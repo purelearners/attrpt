@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Tracker</title>
+    <style>
+        :root {
+  /* Primitive Color Tokens */
+  --color-white: rgba(255, 255, 255, 1);
+  --color-black: rgba(0, 0, 0, 1);
+  --color-cream-50: rgba(252, 252, 249, 1);
+  --color-cream-100: rgba(255, 255, 253, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-charcoal-700: rgba(31, 33, 33, 1);
+  --color-charcoal-800: rgba(38, 40, 40, 1);
+  --color-slate-900: rgba(19, 52, 59, 1);
+  --color-teal-300: rgba(50, 184, 198, 1);
+  --color-teal-400: rgba(45, 166, 178, 1);
+  --color-teal-500: rgba(33, 128, 141, 1);
+  --color-teal-600: rgba(29, 116, 128, 1);
+  --color-teal-700: rgba(26, 104, 115, 1);
+  --color-teal-800: rgba(41, 150, 161, 1);
+  --color-red-400: rgba(255, 84, 89, 1);
+  --color-red-500: rgba(192, 21, 47, 1);
+  --color-orange-400: rgba(230, 129, 97, 1);
+  --color-orange-500: rgba(168, 75, 47, 1);
+
+  --color-brown-600-rgb: 94, 82, 64;
+  --color-teal-500-rgb: 33, 128, 141;
+  --color-slate-900-rgb: 19, 52, 59;
+  --color-slate-500-rgb: 98, 108, 113;
+  --color-red-500-rgb: 192, 21, 47;
+  --color-red-400-rgb: 255, 84, 89;
+  --color-orange-500-rgb: 168, 75, 47;
+  --color-orange-400-rgb: 230, 129, 97;
+
+  --color-bg-1: rgba(59, 130, 246, 0.08);
+  --color-bg-2: rgba(245, 158, 11, 0.08);
+  --color-bg-3: rgba(34, 197, 94, 0.08);
+  --color-bg-4: rgba(239, 68, 68, 0.08);
+  --color-bg-5: rgba(147, 51, 234, 0.08);
+  --color-bg-6: rgba(249, 115, 22, 0.08);
+  --color-bg-7: rgba(236, 72, 153, 0.08);
+  --color-bg-8: rgba(6, 182, 212, 0.08);
+
+  --color-background: var(--color-cream-50);
+  --color-surface: var(--color-cream-100);
+  --color-text: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-500);
+  --color-primary: var(--color-teal-500);
+  --color-primary-hover: var(--color-teal-600);
+  --color-primary-active: var(--color-teal-700);
+  --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-btn-primary-text: var(--color-cream-50);
+  --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-error: var(--color-red-500);
+  --color-success: var(--color-teal-500);
+  --color-warning: var(--color-orange-500);
+  --color-info: var(--color-slate-500);
+  --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+  --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+  --focus-ring: 0 0 0 3px var(--color-focus-ring);
+  --focus-outline: 2px solid var(--color-primary);
+
+  --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --letter-spacing-tight: -0.01em;
+
+  --space-0: 0;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
+    0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-gray-400-rgb: 119, 124, 124;
+    --color-teal-300-rgb: 50, 184, 198;
+    --color-gray-300-rgb: 167, 169, 169;
+    --color-gray-200-rgb: 245, 245, 245;
+
+    --color-bg-1: rgba(29, 78, 216, 0.15);
+    --color-bg-2: rgba(180, 83, 9, 0.15);
+    --color-bg-3: rgba(21, 128, 61, 0.15);
+    --color-bg-4: rgba(185, 28, 28, 0.15);
+    --color-bg-5: rgba(107, 33, 168, 0.15);
+    --color-bg-6: rgba(194, 65, 12, 0.15);
+    --color-bg-7: rgba(190, 24, 93, 0.15);
+    --color-bg-8: rgba(8, 145, 178, 0.15);
+
+    --color-background: var(--color-charcoal-700);
+    --color-surface: var(--color-charcoal-800);
+    --color-text: var(--color-gray-200);
+    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+    --color-primary: var(--color-teal-300);
+    --color-primary-hover: var(--color-teal-400);
+    --color-primary-active: var(--color-teal-800);
+    --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
+    --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
+    --color-secondary-active: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-error: var(--color-red-400);
+    --color-success: var(--color-teal-300);
+    --color-warning: var(--color-orange-400);
+    --color-info: var(--color-gray-300);
+    --color-focus-ring: rgba(var(--color-teal-300-rgb), 0.4);
+    --color-btn-primary-text: var(--color-slate-900);
+    --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+    --color-card-border-inner: rgba(var(--color-gray-400-rgb), 0.15);
+    --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    --color-select-caret: rgba(var(--color-gray-200-rgb), 0.8);
+  }
+}
+
+@font-face {
+  font-family: 'FKGroteskNeue';
+  src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2')
+    format('woff2');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    padding: var(--space-16);
+    line-height: var(--line-height-normal);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: var(--space-32);
+}
+
+.header h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-8);
+    color: var(--color-text);
+}
+
+.header .date {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.grade-selection {
+    display: flex;
+    gap: var(--space-12);
+    justify-content: center;
+    margin-bottom: var(--space-32);
+    flex-wrap: wrap;
+}
+
+.grade-btn {
+    padding: var(--space-12) var(--space-32);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    border: 2px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.grade-btn:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-primary);
+}
+
+.grade-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-btn-primary-text);
+    border-color: var(--color-primary);
+}
+
+.grade-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.lists-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-24);
+    margin-bottom: var(--space-32);
+}
+
+@media (max-width: 768px) {
+    .lists-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.list-box {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-20);
+    box-shadow: var(--shadow-sm);
+}
+
+.list-box.present {
+    border-left: 4px solid var(--color-success);
+}
+
+.list-box.absent {
+    border-left: 4px solid var(--color-error);
+}
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-16);
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.list-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.list-count {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-4) var(--space-12);
+    border-radius: var(--radius-full);
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+}
+
+.list-box.present .list-count {
+    background-color: rgba(var(--color-success-rgb), 0.15);
+    color: var(--color-success);
+}
+
+.list-box.absent .list-count {
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+}
+
+.students-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    min-height: 300px;
+}
+
+.students-list.empty {
+    justify-content: center;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+.student-item {
+    padding: var(--space-12) var(--space-16);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-standard);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+}
+
+.student-item:hover {
+    background-color: var(--color-secondary-hover);
+    transform: translateX(4px);
+}
+
+.list-box.present .student-item:hover {
+    border-color: var(--color-error);
+}
+
+.list-box.absent .student-item:hover {
+    border-color: var(--color-success);
+}
+
+.student-item:active {
+    transform: scale(0.98);
+}
+
+.send-section {
+    text-align: center;
+}
+
+.send-btn {
+    padding: var(--space-16) var(--space-32);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--color-primary);
+    color: var(--color-btn-primary-text);
+    border: none;
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+
+.send-btn:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+.send-btn:active:not(:disabled) {
+    background-color: var(--color-primary-active);
+    transform: scale(0.98);
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.send-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.send-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.no-grade-selected {
+    text-align: center;
+    padding: var(--space-32);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Attendance Tracker</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div class="grade-selection" id="gradeSelection">
+            <!-- Grade buttons will be generated here -->
+        </div>
+
+        <div id="mainContent">
+            <div class="no-grade-selected">Please select a grade to start</div>
+        </div>
+
+        <div class="send-section" id="sendSection" style="display: none;">
+            <button class="send-btn" id="sendBtn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.546 20.2c-.151.423.248.848.688.718l3.156-.935A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+                </svg>
+                Send to WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STUDENT DATA - MODIFY THIS SECTION TO UPDATE STUDENT LISTS
+        // ============================================
+        const studentData = {
+            '9A': [
+'Mst.A D Ajmal Thohith',
+'Ms.Lakshana G',
+'Ms.Anu Rakshitha',
+'Ms.Dhivya Darshini',
+'Ms.E Tejaswini',
+'Ms.Muppiri Cheranvitha',
+'Ms.Saie Jeevana J',
+'Ms.Shamitha',
+'Ms.Sri Vaishnavi',
+'Ms.Tappita Vernica Reddy',
+'Ms.Von Valentina M.V.',
+'Ms.Yashika R',
+'Mst Dhasvanth Kumar',
+'Mst Krishna Nalagampalli Papudesi',
+'Mst. E.Pawan',
+'Mst.A.R.Parthiv',
+'Mst.Boothala Darshan Reddy',
+'Mst.Harindranath',
+'Mst.Harshith R',
+'Mst.Jeevith Josh Kr',
+'Mst.Praneath',
+'Mst.Prithvi',
+'Mst.Roshan Praveen',
+'Mst.Tarun Pranav S.B',
+'Ms.R Irene Janita',
+'Mst.Tamilvelan S',
+'Mst.Thrilok R',
+'Mst.Vaitheesh Sai',
+'Mst.Venkatesan Sri Mallesh',
+            ],
+ '9B': [
+'Mst.Buvanesh Y',
+'Ms.Hemavathi S',
+'Ms Tarika',
+'Ms.Joshna',
+'Ms.Niranjana Sai',
+'Ms.Teja T',
+'Mst.Krishna Karthik Buddi',
+'Mst.Navyanth',
+'Mst.Nivas P',
+'Mst.Vishwaa Karthik',
+'Mst.Sujan C',
+            ],
+'10A': [
+'Mst.Abhiram Dasari ',
+'Mst.Dhruv Charan',
+'Ms.Eshita ',
+'Mst.Hariharan V.A',
+'Ms.Harshita V',
+'Mst.Khethan Krishna K ',
+'Ms.Lasya M ',
+'Mst.Mohnish Reddy',
+'Mst.Monish',
+'Mst.Mounish S ',
+'Mst.Muni Nihal B ',
+'Mst.Reddy Anish Vegamoor ',
+'Mst.Saiteja',
+'Ms.Shanvi Reddy',
+'Mst.Shrinik Varshan',
+'Mst.Vikas V',
+            ],
+'10B': [
+'Mst.Aadhvan',
+'Mst.Arunnatesan Srinivasan',
+'Mst.Fehmaan Sk',
+'Mst.Giri Shankar',
+'Ms.Gurram Varsha ',
+'Ms.Harini V.A',
+'Mst.Hemanth V',
+'Mst.Keerthi Vasan J',
+'Mst.Keerthi Vashan',
+'Ms.Krishika',
+'Mst.Nishanth C',
+'Mst.Palasamudram Praneeth Sai ',
+'Mst.Samuel Richards B',
+'Mst.Saran',
+'Mst.Sharad Bhushan S',
+'Mst.Sunku Nagasai Nikiith',
+'Mst.Sunku Nagasai Nishith',
+'Ms.Thaania Bhagirathi',
+'Mst.Rishik ',
+            ],
+'11': [
+                'Mst.Abimanyu.B',
+'Mst.Abinav.S',
+'Ms.Aditi Prasad',
+'Mst.Aditya Raj Singh',
+'Mst.Ajay Krishna K P',
+'Mst.Bachala Chetan Reddy',
+'Mst.Berwin Reuben Varman',
+'Mst.Darshan K',
+'Mst.Dinesh Karthik J',
+'Mst.Ganesh N',
+'Ms.Geerthana G',
+'Mst.Gowtham Vasudevan S',
+'Mst. Haran Pranav E',
+'Mst. Hrisheek Aryan Nunna',
+'Mst. Jaghadheesh G',
+'Ms.Jai Asmitha',
+'Ms.Jayashree C J',
+'Ms.Kanishka V',
+'Mst.Krithik Sai Y',
+'Mst.Nishanth T.S',
+'Mst.Nithin B',
+'Mst.Nitin Jose A',
+'Mst.Pranav N R S',
+'Ms.Prithikha S',
+'Mst.Raajarajan P S',
+'Mst.Ramprasaad R G',
+'Mst.Renesh Jayaprapu',
+'Mst.Sanjaiy Varman C M',
+'Mst.Sanjeevee N',
+'Mst.Sanjit Roshan',
+'Mst.Santhosh Sagar S',
+'Mst.Saswin M',
+'Mst.Sathyanathavarman A',
+'Mst.Shankaranarayanan M',
+'Mst.Shanmugavarshini D M',
+'Mst.Shylendar A K',
+'Mst.Siddharth Dharshan D',
+'Mst.Srihari V',
+'Mst.Surya S',
+'Ms.Thanishka Mohan S',
+'Mst.Tharun Easwar S',
+'Mst.Udhaya A',
+'Mst.Vaishnav Chowdary',
+'Mst.Varun S B',
+'Mst.Vibhuraman ',
+            ],
+
+'12A': [
+ 'Mst.Adhitya Pranav',
+'Ms.Bhavana',
+'Mst.Bhuvan Harshaj',
+'Mst.Chaitanya (Cbse)',
+'Mst.Chukisivam V',
+'Mst.Dharan S V',
+'Mst.Duttala Likith Reddy',
+'Mst.Geethesh',
+'Mst.Guruthvik Reddy',
+'Mst.Hanish',
+'Mst.Harikaran',
+'Ms.Harini (Cbse)',
+'Mst.Harish Ragavndar',
+'Mst.Harshit V',
+'Mst.Jaswant S',
+'Mst.Jaswanth V',
+'Mst.Jeeva Surya',
+'Mst.Kavensvar',
+'Mst.Kavin  Haritharan',
+'Ms.Keerthana',
+'Ms.Kusuma Anjali',
+'Ms.Lohitha T',
+'Mst.Madavaneri Keshavardhan',
+'Ms.Mahathi',
+'Mst. Manipi Sahith',
+'Mst. Nikhil Sujith Kumar',
+'Mst. Sai Nihal',
+'Mst. Sainath S',
+'Mst.Sarvesh Raj',
+'Mst.Sathyanarayana',
+'Mst. Shiva Sri Raam',
+'Mst. Shriram S',
+'Mst.Shubhranshu Saha',
+'Mst.Sree Saravana Raju',
+'Mst.Sreejan',
+'Mst. Subbareddy Gari John Abhinav',
+'Mst.Sudharshan',
+'Mst. Tarun Sai',
+'Mst. Thanigaiselvan',
+'Ms. Tharinishree',
+'Mst.Tharun Kumar',
+'Mst.Vayila Ramcharan',
+            ],
+'12B': [
+'Mst.Abhilash Paul ',
+'Ms.Kamalikaa',
+'Mst.Kishore  (Cs)',
+'Mst.Nithish Kumar ',
+'Mst.Raghulnathan S ',
+'Mst.Velsrinivas',
+            ],
+        };
+
+        // WhatsApp number (with country code, no spaces or special characters)
+        const whatsappNumber = '918870977156';
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        let currentGrade = null;
+        let presentStudents = [];
+        let absentStudents = [];
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            displayCurrentDate();
+            renderGradeButtons();
+        }
+
+        function displayCurrentDate() {
+            const dateElement = document.getElementById('currentDate');
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = today.toLocaleDateString('en-US', options);
+        }
+
+        function renderGradeButtons() {
+            const gradeSelection = document.getElementById('gradeSelection');
+            gradeSelection.innerHTML = '';
+
+            Object.keys(studentData).forEach(grade => {
+                const button = document.createElement('button');
+                button.className = 'grade-btn';
+                button.textContent = grade;
+                button.onclick = () => selectGrade(grade);
+                gradeSelection.appendChild(button);
+            });
+        }
+
+        // ============================================
+        // GRADE SELECTION
+        // ============================================
+        function selectGrade(grade) {
+            currentGrade = grade;
+            presentStudents = [...studentData[grade]];
+            absentStudents = [];
+
+            // Update active button
+            document.querySelectorAll('.grade-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === grade);
+            });
+
+            renderStudentLists();
+            updateSendButton();
+        }
+
+        // ============================================
+        // RENDER STUDENT LISTS
+        // ============================================
+        function renderStudentLists() {
+            const mainContent = document.getElementById('mainContent');
+            const sendSection = document.getElementById('sendSection');
+
+            if (!currentGrade) {
+                mainContent.innerHTML = '<div class="no-grade-selected">Please select a grade to start</div>';
+                sendSection.style.display = 'none';
+                return;
+            }
+
+            sendSection.style.display = 'block';
+
+            mainContent.innerHTML = `
+                <div class="lists-container">
+                    <div class="list-box present">
+                        <div class="list-header">
+                            <div class="list-title">Present Students</div>
+                            <div class="list-count" id="presentCount">0</div>
+                        </div>
+                        <div class="students-list" id="presentList"></div>
+                    </div>
+                    <div class="list-box absent">
+                        <div class="list-header">
+                            <div class="list-title">Absentees List</div>
+                            <div class="list-count" id="absentCount">0</div>
+                        </div>
+                        <div class="students-list" id="absentList"></div>
+                    </div>
+                </div>
+            `;
+
+            updatePresentList();
+            updateAbsentList();
+        }
+
+        function updatePresentList() {
+            const presentList = document.getElementById('presentList');
+            const presentCount = document.getElementById('presentCount');
+
+            if (presentStudents.length === 0) {
+                presentList.innerHTML = '<div class="empty">All students marked absent</div>';
+                presentList.classList.add('empty');
+            } else {
+                presentList.classList.remove('empty');
+                presentList.innerHTML = '';
+                presentStudents.forEach(student => {
+                    const studentItem = document.createElement('div');
+                    studentItem.className = 'student-item';
+                    studentItem.textContent = student;
+                    studentItem.onclick = () => markAbsent(student);
+                    presentList.appendChild(studentItem);
+                });
+            }
+
+            presentCount.textContent = presentStudents.length;
+        }
+
+        function updateAbsentList() {
+            const absentList = document.getElementById('absentList');
+            const absentCount = document.getElementById('absentCount');
+
+            if (absentStudents.length === 0) {
+                absentList.innerHTML = '<div class="empty">No absentees yet</div>';
+                absentList.classList.add('empty');
+            } else {
+                absentList.classList.remove('empty');
+                absentList.innerHTML = '';
+                absentStudents.forEach(student => {
+                    const studentItem = document.createElement('div');
+                    studentItem.className = 'student-item';
+                    studentItem.textContent = student;
+                    studentItem.onclick = () => markPresent(student);
+                    absentList.appendChild(studentItem);
+                });
+            }
+
+            absentCount.textContent = absentStudents.length;
+        }
+
+        // ============================================
+        // STUDENT MOVEMENT
+        // ============================================
+        function markAbsent(student) {
+            const index = presentStudents.indexOf(student);
+            if (index > -1) {
+                presentStudents.splice(index, 1);
+                absentStudents.push(student);
+                updatePresentList();
+                updateAbsentList();
+                updateSendButton();
+            }
+        }
+
+        function markPresent(student) {
+            const index = absentStudents.indexOf(student);
+            if (index > -1) {
+                absentStudents.splice(index, 1);
+                presentStudents.push(student);
+                // Sort to maintain original order
+                presentStudents.sort((a, b) => {
+                    const originalList = studentData[currentGrade];
+                    return originalList.indexOf(a) - originalList.indexOf(b);
+                });
+                updatePresentList();
+                updateAbsentList();
+                updateSendButton();
+            }
+        }
+
+        // ============================================
+        // SEND TO WHATSAPP
+        // ============================================
+        function updateSendButton() {
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) {
+                sendBtn.disabled = absentStudents.length === 0;
+            }
+        }
+
+        function formatDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function sendToWhatsApp() {
+            if (absentStudents.length === 0) return;
+
+            const date = formatDate();
+            const grade = currentGrade;
+            const absenteesList = absentStudents.join('\n');
+
+            const message = `${date}\nGrade: ${grade}\nAbsentees list:\n${absenteesList}`;
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendToWhatsApp);
+            }
+        });
+    </script>
+</body>
+</html>
