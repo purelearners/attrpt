@@ -26,11 +26,20 @@
     .list.od .list-title { color: #f59e0b; }
     
     .student-list { max-height: 350px; overflow-y: auto; }
-    .student-btn { display: block; width: 100%; background: white; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; text-align: left; font-size: 0.95em; transition: all 0.2s; }
-    .student-btn:hover { background: #f9fafb; transform: translateX(2px); }
-    .list.present .student-btn:hover { background: #f0fdf4; border-color: #10b981; }
-    .list.absent .student-btn:hover { background: #fef2f2; border-color: #ef4444; }
-    .list.od .student-btn:hover { background: #fffbeb; border-color: #f59e0b; }
+    .student-item { display: flex; align-items: center; gap: 10px; background: white; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; border-radius: 6px; transition: all 0.2s; }
+    .student-item:hover { background: #f9fafb; }
+    .student-checkbox { width: 18px; height: 18px; cursor: pointer; }
+    .student-name { flex: 1; font-size: 0.95em; }
+    .delete-btn { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .delete-btn:hover { background: #dc2626; }
+    .move-btns { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+    .move-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.3s; }
+    .move-to-absent { background: #ef4444; color: white; }
+    .move-to-absent:hover:not(:disabled) { background: #dc2626; }
+    .move-to-od { background: #f59e0b; color: white; }
+    .move-to-od:hover:not(:disabled) { background: #d97706; }
+    .move-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+    .od-reason-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; margin-top: 10px; font-size: 0.9em; }
     
     .action-btns { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
     .action-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: all 0.3s; }
@@ -59,9 +68,10 @@
     .send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
     .send-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
     
-    .status-msg { padding: 12px 15px; border-radius: 6px; display: none; font-weight: 600; margin-bottom: 10px; }
+    .status-msg { padding: 12px 15px; border-radius: 6px; display: none; font-weight: 600; margin-bottom: 10px; text-align: center; }
     .status-msg.success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; display: block; }
     .status-msg.error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; display: block; }
+    .status-msg.loading { background: #e0e7ff; color: #3730a3; border-left: 4px solid #4f46e5; display: block; }
     
     @media (max-width: 1024px) {
       .lists-wrap { flex-direction: column; }
@@ -74,11 +84,17 @@
 <div class="container">
   <h1>📚 Attendance Tracker</h1>
 
+  <div id="statusMsg" class="status-msg"></div>
+
   <div class="grade-select" id="gradeSelect"></div>
 
   <div class="lists-wrap">
     <div class="list present">
       <div class="list-title">✓ Present Students <span id="presentCount">(0)</span></div>
+      <div class="move-btns">
+        <button class="move-btn move-to-absent" id="moveToAbsentBtn">Mark as Absent</button>
+        <button class="move-btn move-to-od" id="moveToODBtn">Mark as OD</button>
+      </div>
       <div class="student-list" id="presentList"></div>
     </div>
     <div class="list absent">
@@ -87,6 +103,7 @@
     </div>
     <div class="list od">
       <div class="list-title">🚌 OD Students <span id="odCount">(0)</span></div>
+      <input type="text" class="od-reason-input" id="odReasonInput" placeholder="Reason for OD (optional)">
       <div class="student-list" id="odList"></div>
     </div>
   </div>
@@ -104,67 +121,18 @@
   </div>
 
   <div class="send-section">
-    <div id="statusMsg" class="status-msg"></div>
-    <button class="send-btn" id="sendBtn">Send to WhatsApp</button>
+    <button class="send-btn" id="sendBtn" disabled>Send to WhatsApp</button>
   </div>
 </div>
 
 <script>
-// ========== CONFIGURATION - EDIT HERE ==========
-// Your Google Apps Script Webhook URL
+// ========== CONFIGURATION ==========
+// PASTE YOUR NEW DEPLOYED WEB APP URL HERE:
 const webhookUrl = 'https://script.google.com/macros/s/AKfycbwAioO5u-jd86_F2ktBsLi6KpXjYjBiiZr96vTxjrxUqmrSdlC3WX5SwSBy56RtNheioA/exec';
 
-// Student data by grade
-const studentData = {
-'9A': [
-    'Student1', 'Student2'
-  ],
-  '9B': [
-    'Student2', 'Student3'
-  ],
-  '10A': [
-    'Mst.A D Ajmal Thohith', 'Ms.Lakshana G', 'Ms.Anu Rakshitha', 'Ms.Dhivya Darshini',
-    'Ms.E Tejaswini', 'Ms.Muppiri Cheranvitha', 'Ms.Saie Jeevana J', 'Ms.Shamitha',
-    'Ms.Sri Vaishnavi', 'Ms.Tappita Vernica Reddy', 'Ms.Von Valentina M.V.', 'Ms.Yashika R',
-    'Mst Dhasvanth Kumar', 'Mst Krishna Nalagampalli Papudesi', 'Mst. E.Pawan', 'Mst.A.R.Parthiv',
-    'Mst.Boothala Darshan Reddy', 'Mst.Harindranath', 'Mst.Harshith R', 'Mst.Jeevith Josh Kr',
-    'Mst.Praneath', 'Mst.Prithvi', 'Mst.Roshan Praveen', 'Mst.Tarun Pranav S.B',
-    'Ms.R Irene Janita', 'Mst.Tamilvelan S', 'Mst.Thrilok R', 'Mst.Vaitheesh Sai',
-    'Mst.Venkatesan Sri Mallesh', 'Ms.Rithika','Mst.Shine Joshva','Mst.Krishna Karthik Buddi'
-  ],
-  '10B': [
-    'Mst.Buvanesh Y', 'Ms.Hemavathi S', 'Ms Tarika', 'Ms.Joshna', 'Ms.Niranjana Sai',
-    'Ms.Teja T', 'Mst.Navyanth', 'Mst.Nivas P',
-    'Mst.Vishwaa Karthik', 'Ms.Eniya V'
-  ],
-  '11A': [
-    'Mst.Abhiram Dasari', 'Mst.Dhruv Charan', 'Ms.Eshita', 'Mst.Hariharan V.A',
-    'Ms.Harshita V', 'Mst.Khethan Krishna K', 'Ms.Lasya M', 'Mst.Mohnish Reddy',
-    'Mst.Monish', 'Mst.Mounish S', 'Mst.Muni Nihal B', 'Mst.Reddy Anish Vegamoor',
-    'Mst.Saiteja', 'Ms.Shanvi Reddy', 'Mst.Shrinik Varshan', 'Mst.Vikas V', 'Mst.Aadhvan', 'Mst.Arunnatesan Srinivasan', 'Mst.Fehmaan Sk', 'Mst.Giri Shankar',
-    'Ms.Gurram Varsha', 'Ms.Harini V.A', 'Mst.Hemanth V', 'Mst.Keerthi Vasan J',
-    'Mst.Keerthi Vashan', 'Ms.Krishika', 'Mst.Nishanth C', 'Mst.Palasamudram Praneeth Sai',
-    'Mst.Samuel Richards B', 'Mst.Saran', 'Mst.Sharad Bhushan S', 'Mst.Sunku Nagasai Nikiith',
-    'Mst.Sunku Nagasai Nishith', 'Ms.Thaania Bhagirathi', 'Mst.Rishik'
-  ],
-
-  '12': [
-    'Mst.Abimanyu.B', 'Mst.Abinav.S', 'Ms.Aditi Prasad', 'Mst.Aditya Raj Singh',
-    'Mst.Ajay Krishna K P', 'Mst.Bachala Chetan Reddy', 'Mst.Berwin Reuben Varman',
-    'Mst.Darshan K', 'Mst.Dinesh Karthik J', 'Mst.Ganesh N', 'Ms.Geerthana G',
-    'Mst.Gowtham Vasudevan S', 'Mst. Haran Pranav E', 'Mst. Hrisheek Aryan Nunna',
-    'Mst. Jaghadheesh G', 'Ms.Jai Asmitha', 'Ms.Jayashree C J', 'Ms.Kanishka V',
-    'Mst.Krithik Sai Y', 'Mst.Nishanth T.S', 'Mst.Nithin B', 'Mst.Nitin Jose A',
-    'Mst.Pranav N R S', 'Ms.Prithikha S', 'Mst.Raajarajan P S', 'Mst.Ramprasaad R G',
-    'Mst.Renesh Jayaprapu', 'Mst.Sanjaiy Varman C M', 'Mst.Sanjeevee N', 'Mst.Sanjit Roshan',
-    'Mst.Santhosh Sagar S', 'Mst.Saswin M', 'Mst.Sathyanathavarman A', 'Mst.Shankaranarayanan M',
-    'Mst.Shanmugavarshini D M', 'Mst.Shylendar A K', 'Mst.Siddharth Dharshan D',
-    'Mst.Srihari V', 'Mst.Surya S', 'Ms.Thanishka Mohan S', 'Mst.Tharun Easwar S',
-    'Mst.Udhaya A', 'Mst.Vaishnav Chowdary', 'Mst.Varun S B', 'Mst.Vibhuraman'
-  ],
-  
-};
-// ========== END CONFIGURATION ==========
+// Data starts empty and loads from Sheets automatically
+let studentData = {};
+// ===================================
 
 let currentGrade = null;
 let presentStudents = [];
@@ -187,12 +155,15 @@ const clearSummaryBtn = document.getElementById('clearSummary');
 const sendBtn = document.getElementById('sendBtn');
 const statusMsg = document.getElementById('statusMsg');
 
-function showStatus(message, isSuccess) {
+function showStatus(message, type = 'success') {
   statusMsg.textContent = message;
-  statusMsg.className = 'status-msg ' + (isSuccess ? 'success' : 'error');
-  setTimeout(() => {
-    statusMsg.className = 'status-msg';
-  }, 5000);
+  statusMsg.className = `status-msg ${type}`;
+  if (type !== 'loading') {
+    setTimeout(() => {
+      statusMsg.className = 'status-msg';
+      statusMsg.style.display = 'none';
+    }, 5000);
+  }
 }
 
 function renderGrades() {
@@ -219,50 +190,86 @@ function selectGrade(grade) {
 function renderLists() {
   presentList.innerHTML = '';
   presentStudents.forEach(name => {
-    const btn = document.createElement('button');
-    btn.textContent = name;
-    btn.className = 'student-btn';
-    btn.onclick = () => {
-      presentStudents = presentStudents.filter(n => n !== name);
-      absentStudents.push(name);
-      renderLists();
-    };
-    presentList.appendChild(btn);
+    const item = document.createElement('div');
+    item.className = 'student-item';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'student-checkbox';
+    checkbox.dataset.name = name;
+    checkbox.onchange = () => updateMoveButtons();
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'student-name';
+    nameSpan.textContent = name;
+    
+    item.appendChild(checkbox);
+    item.appendChild(nameSpan);
+    presentList.appendChild(item);
   });
 
   absentList.innerHTML = '';
-  absentStudents.forEach(name => {
-    const btn = document.createElement('button');
-    btn.textContent = name;
-    btn.className = 'student-btn';
-    btn.onclick = () => {
+  absentStudents.forEach((name, index) => {
+    const item = document.createElement('div');
+    item.className = 'student-item';
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'student-name';
+    nameSpan.textContent = `${index + 1}. ${name}`;
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => {
       absentStudents = absentStudents.filter(n => n !== name);
-      odStudents.push(name);
+      presentStudents.push(name);
       renderLists();
     };
-    absentList.appendChild(btn);
+    
+    item.appendChild(nameSpan);
+    item.appendChild(deleteBtn);
+    absentList.appendChild(item);
   });
 
   odList.innerHTML = '';
-  odStudents.forEach(name => {
-    const btn = document.createElement('button');
-    btn.textContent = name;
-    btn.className = 'student-btn';
-    btn.onclick = () => {
+  odStudents.forEach((name, index) => {
+    const item = document.createElement('div');
+    item.className = 'student-item';
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'student-name';
+    nameSpan.textContent = `${index + 1}. ${name}`;
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => {
       odStudents = odStudents.filter(n => n !== name);
       presentStudents.push(name);
       renderLists();
     };
-    odList.appendChild(btn);
+    
+    item.appendChild(nameSpan);
+    item.appendChild(deleteBtn);
+    odList.appendChild(item);
   });
 
   presentCount.textContent = `(${presentStudents.length})`;
   absentCount.textContent = `(${absentStudents.length})`;
   odCount.textContent = `(${odStudents.length})`;
   
-  // Enable Add To Summary if there are absentees OR OD students
+  updateMoveButtons();
+  
   addToSummaryBtn.disabled = !currentGrade || (absentStudents.length === 0 && odStudents.length === 0);
   allPresentBtn.disabled = !currentGrade;
+}
+
+function updateMoveButtons() {
+  const selectedCount = document.querySelectorAll('.student-checkbox:checked').length;
+  const moveToAbsentBtn = document.getElementById('moveToAbsentBtn');
+  const moveToODBtn = document.getElementById('moveToODBtn');
+  if (moveToAbsentBtn) moveToAbsentBtn.disabled = selectedCount === 0;
+  if (moveToODBtn) moveToODBtn.disabled = selectedCount === 0;
 }
 
 function buildSummaryMessage() {
@@ -277,37 +284,45 @@ function buildSummaryMessage() {
     
     msg += `\n\nGrade: ${grade}`;
     
-    // Strength calculation with OD
     if (data.od.length > 0) {
       msg += `\nTotal: ${total}, Present: ${presentCount} (OD-${data.od.length}), Absent: ${absentCount}`;
     } else {
       msg += `\nTotal: ${total}, Present: ${presentCount}, Absent: ${absentCount}`;
     }
     
-    // Add absentees
     if (data.absent.length === 0) {
       msg += `\nAll Present`;
     } else {
       msg += `\nAbsentees list:`;
-      data.absent.forEach(nm => {
-        msg += `\n${nm}`;
+      data.absent.forEach((nm, index) => {
+        msg += `\n${index + 1}. ${nm}`;
       });
     }
     
-    // Add OD students only if they exist
     if (data.od.length > 0) {
-      msg += `\n\nOD students: ${data.od.join(', ')}`;
+      const odReason = data.odReason || '';
+      if (odReason) {
+        msg += `\nOD students (${odReason}):`;
+      } else {
+        msg += `\nOD students:`;
+      }
+      data.od.forEach((nm, index) => {
+        msg += `\n${index + 1}. ${nm}`;
+      });
     }
   });
   
   return msg.trim();
 }
 
+// Includes 24h Timestamp
 function buildSheetsData() {
   let today = new Date();
   const dateStr = today.toLocaleDateString('en-IN');
+  const timeStr = today.toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  
   let data = {
-    date: dateStr,
+    date: `${dateStr} ${timeStr}`,
     entries: {}
   };
 
@@ -329,10 +344,12 @@ function buildSheetsData() {
 
 addToSummaryBtn.onclick = () => {
   if (currentGrade && (absentStudents.length > 0 || odStudents.length > 0)) {
+    const odReason = document.getElementById('odReasonInput').value.trim();
     summary[currentGrade] = {
       present: [...presentStudents],
       absent: [...absentStudents],
-      od: [...odStudents]
+      od: [...odStudents],
+      odReason: odReason
     };
     renderSummary();
   }
@@ -366,23 +383,33 @@ function renderSummary() {
     summaryText += `<div class="summary-item">`;
     summaryText += `<div class="summary-grade">Grade ${grade}</div>`;
     
-    // Strength calculation with OD
     if (gradeData.od.length > 0) {
       summaryText += `<div class="summary-stats">Total: ${total} | Present: ${presentCount} (OD-${gradeData.od.length}) | Absent: ${absentCount}</div>`;
     } else {
       summaryText += `<div class="summary-stats">Total: ${total} | Present: ${presentCount} | Absent: ${absentCount}</div>`;
     }
     
-    // Show absentees
     if (gradeData.absent.length === 0) {
       summaryText += `<div class="summary-names"><span class="all-present-text">✓ All Present</span></div>`;
     } else {
-      summaryText += `<div class="summary-names"><b>Absent:</b> ${gradeData.absent.join(', ')}</div>`;
+      summaryText += `<div class="summary-names"><b>Absent:</b><br>`;
+      gradeData.absent.forEach((nm, index) => {
+        summaryText += `${index + 1}. ${nm}<br>`;
+      });
+      summaryText += `</div>`;
     }
     
-    // Show OD students only if they exist
     if (gradeData.od.length > 0) {
-      summaryText += `<div class="summary-od">🚌 OD: ${gradeData.od.join(', ')}</div>`;
+      const odReason = gradeData.odReason || '';
+      if (odReason) {
+        summaryText += `<div class="summary-od">🚌 OD (${odReason}):<br>`;
+      } else {
+        summaryText += `<div class="summary-od">🚌 OD:<br>`;
+      }
+      gradeData.od.forEach((nm, index) => {
+        summaryText += `${index + 1}. ${nm}<br>`;
+      });
+      summaryText += `</div>`;
     }
     
     summaryText += `</div>`;
@@ -398,43 +425,102 @@ clearSummaryBtn.onclick = () => {
 };
 
 sendBtn.onclick = () => {
-  if (!webhookUrl || webhookUrl === 'https://script.googleapis.com/macros/d/YOUR_SCRIPT_ID/usercontent') {
-    showStatus('⚠️ Please configure webhook URL in the code', false);
+  if (!webhookUrl || webhookUrl === 'YOUR_NEW_WEB_APP_URL_HERE') {
+    showStatus('⚠️ Please configure webhook URL in the code', 'error');
     return;
   }
 
   if (Object.keys(summary).length === 0) {
-    showStatus('⚠️ Please add at least one grade to summary', false);
+    showStatus('⚠️ Please add at least one grade to summary', 'error');
     return;
   }
 
   sendBtn.disabled = true;
   const data = buildSheetsData();
 
-  // Send to WhatsApp IMMEDIATELY
+  // 1. Send to WhatsApp IMMEDIATELY
   let msg = encodeURIComponent(buildSummaryMessage());
   window.open(`https://wa.me/?text=${msg}`, '_blank');
   
-  showStatus('✓ Opening WhatsApp...', true);
+  showStatus('✓ Opening WhatsApp...', 'success');
 
-  // Save to Google Sheets in the background (don't wait)
+  // 2. Save to Google Sheets in the background
   fetch(webhookUrl, {
     method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(data)
   })
-  .then(() => {
-    showStatus('✓ Data saved to Google Sheets & sent to WhatsApp!', true);
-    sendBtn.disabled = false;
+  .then(response => response.json())
+  .then((result) => {
+    if (result.status === 'success') {
+      showStatus('✓ Data saved to Google Sheets & sent to WhatsApp!', 'success');
+      setTimeout(() => {
+        sendBtn.disabled = false;
+      }, 800);
+    } else {
+      showStatus('✗ Error from Server: ' + result.message, 'error');
+      sendBtn.disabled = false;
+    }
   })
   .catch(err => {
-    showStatus('✗ WhatsApp sent, but error saving to Google Sheets: ' + err.message, false);
+    showStatus('✗ Network Error: ' + err.message, 'error');
     sendBtn.disabled = false;
   });
 };
 
-renderGrades();
+document.getElementById('moveToAbsentBtn').addEventListener('click', () => {
+  const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+  checkboxes.forEach(cb => {
+    const name = cb.dataset.name;
+    presentStudents = presentStudents.filter(n => n !== name);
+    absentStudents.push(name);
+  });
+  renderLists();
+});
+
+document.getElementById('moveToODBtn').addEventListener('click', () => {
+  const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+  checkboxes.forEach(cb => {
+    const name = cb.dataset.name;
+    presentStudents = presentStudents.filter(n => n !== name);
+    odStudents.push(name);
+  });
+  renderLists();
+});
+
+// Start the app by fetching names dynamically (with Cache Buster)
+async function initializeApp() {
+  showStatus('⏳ Loading student lists from Google Sheets...', 'loading');
+  sendBtn.disabled = true;
+
+  if (!webhookUrl || webhookUrl === 'YOUR_NEW_WEB_APP_URL_HERE') {
+    showStatus('⚠️ Webhook URL is missing! Add it in the code.', 'error');
+    return;
+  }
+
+  try {
+    // Adding timestamp to force browser to fetch fresh data every time
+    const response = await fetch(webhookUrl + "?t=" + new Date().getTime());
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      studentData = result.data;
+      if (Object.keys(studentData).length === 0) {
+         showStatus('⚠️ Connected, but the Masternames sheet is empty.', 'error');
+      } else {
+         renderGrades();
+         statusMsg.style.display = 'none';
+      }
+    } else {
+      showStatus('✗ Error loading names: ' + result.message, 'error');
+    }
+  } catch (err) {
+    showStatus('✗ Could not connect. Check your Webhook URL.', 'error');
+  }
+}
+
+// Boot up
+initializeApp();
 </script>
 </body>
 </html>
